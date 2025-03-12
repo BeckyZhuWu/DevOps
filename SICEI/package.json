@@ -1,0 +1,12 @@
+{
+  "name": "sicei",
+  "version": "1.0.0",
+  "description": "Aplicación REST SICEI",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
