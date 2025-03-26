@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = 'tu-usuario/tu-imagen' // Cambia esto
+        CONTAINER_NAME = 'nombre-contenedor'   // Cambia esto
+    }
+    
+    stages {
+        stage('Clonar repositorio') {
+            steps {
+                git branch: 'main', url: 'https://github.com/BeckyZhuWu/DevOps.git'
+            }
+        }
+        
+        stage('Construir imagen Docker') {
+            steps {
+                script {
+                    docker.build("${DOCKER_IMAGE}:${BUILD_ID}")
+                }
+            }
+        }
+        
+        stage('Detener contenedor anterior') {
+            steps {
+                script {
+                    try {
+                        sh "docker stop ${CONTAINER_NAME} || true"
+                        sh "docker rm ${CONTAINER_NAME} || true"
+                    } catch (Exception e) {
+                        echo "No se pudo detener/eliminar el contenedor anterior: ${e}"
+                    }
+                }
+            }
+        }
+        
+        stage('Desplegar nueva imagen') {
+            steps {
+                script {
+                    sh "docker run -d --name ${CONTAINER_NAME} -p 80:80 ${DOCKER_IMAGE}:${BUILD_ID}"
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Pipeline completado'
+        }
+        success {
+            echo '¡Despliegue exitoso!'
+        }
+        failure {
+            echo 'El pipeline falló'
+        }
+    }
+}
