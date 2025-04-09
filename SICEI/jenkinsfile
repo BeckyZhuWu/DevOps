@@ -1,21 +1,27 @@
 pipeline {
     agent {
         docker {
-            image 'node:18-alpine'  // Versión ligera con Node.js y Shell
+            image 'alpine:latest'  // Imagen mínima con shell
             args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
     stages {
         stage('Build') {
             steps {
-                echo '🔨 Building SICEI...'
-                sh 'npm install'  // Ahora funcionará
+                dir('SICEI') {
+                    script {
+                        // Verifica que el shell funciona
+                        sh 'echo "Shell está disponible!"'
+                        sh 'npm install'
+                    }
+                }
             }
         }
         stage('Deploy') {
             steps {
-                echo '🚀 Deploying SICEI...'
-                sh 'docker build -t sicei-app .'
+                dir('SICEI') {
+                    sh 'docker build -t sicei-app .'
+                }
             }
         }
     }
