@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = "sicei-app"    // Nombre de tu imagen Docker
+        DOCKER_TAG = "latest"         // Tag de la imagen
+    }
+    
+    stages {
+        // Stage 1: Build (Instalar dependencias y construir imagen Docker)
+        stage('Build') {
+            steps {
+                echo '🔨 Building SICEI...'
+                sh 'npm install'                          // Instala dependencias Node.js
+                sh 'docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .'  // Construye la imagen Docker
+            }
+        }
+        
+        // Stage 2: Deploy (Ejecutar el contenedor)
+        stage('Deploy') {
+            steps {
+                echo ' 🚀 Deploying SICEI...'
+                sh 'docker run -d -p 3000:3000 --name sicei ${DOCKER_IMAGE}:${DOCKER_TAG}'  // Inicia el contenedor
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo '✅ Pipeline ejecutado correctamente!'
+        }
+        failure {
+            echo '❌ Pipeline falló!'
+        }
+    }
+}

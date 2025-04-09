@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-// Datos hardcoded
 const alumnos = [
     { nombre: 'Becky Zhu', matricula: 'A15001597' },
     { nombre: 'Alice francois', matricula: 'A12345678' },
