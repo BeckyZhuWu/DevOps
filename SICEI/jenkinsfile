@@ -1,28 +1,82 @@
 pipeline {
-    agent {
-        docker {
-            image 'alpine:latest'  // Imagen mínima con shell
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
+    agent any
+    
+    environment {
+        // Configura rutas específicas para macOS
+        PATH = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:$PATH"
+        HOME = "/Users/${env.USER}"
     }
+
     stages {
-        stage('Build') {
+        stage('Setup Environment') {
+            steps {
+                script {
+                    // Verifica el entorno macOS
+                    sh '''#!/bin/bash -l
+                        echo "=== Configurando entorno macOS ==="
+                        echo "Usuario: $(whoami)"
+                        echo "Shell: $SHELL"
+                        echo "PATH: $PATH"
+                        echo "Node: $(node --version)"
+                        echo "npm: $(npm --version)"
+                        echo "Docker: $(docker --version)"
+                    '''
+                }
+            }
+        }
+
+        stage('Build SICEI') {
             steps {
                 dir('SICEI') {
                     script {
-                        // Verifica que el shell funciona
-                        sh 'echo "Shell está disponible!"'
-                        sh 'npm install'
+                        // Instala dependencias con npm (usa bash explícitamente)
+                        sh '''#!/bin/bash -l
+                            echo "=== Instalando dependencias ==="
+                            npm install
+                            npm list --depth=0
+                        '''
                     }
                 }
             }
         }
-        stage('Deploy') {
+
+        stage('Docker Build') {
             steps {
                 dir('SICEI') {
-                    sh 'docker build -t sicei-app .'
+                    script {
+                        // Construye la imagen Docker
+                        sh '''#!/bin/bash -l
+                            echo "=== Construyendo imagen Docker ==="
+                            docker build -t sicei-app .
+                            docker images | grep sicei-app
+                        '''
+                    }
                 }
             }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Ejecuta el contenedor
+                    sh '''#!/bin/bash -l
+                        echo "=== Desplegando contenedor ==="
+                        docker run -d -p 3000:3000 --name sicei-container sicei-app
+                        docker ps | grep sicei-container
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Pipeline ejecutado correctamente en macOS!"
+            slackSend channel: '#devops', message: '✅ SICEI desplegado correctamente en macOS'
+        }
+        failure {
+            echo "❌ Error en el pipeline"
+            slackSend channel: '#devops', message: '❌ Fallo en el pipeline de SICEI en macOS'
         }
     }
 }
