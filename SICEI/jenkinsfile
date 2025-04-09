@@ -4,16 +4,25 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Instalando dependencias y construyendo imagen Docker...'
-                sh 'npm install'
-                sh 'docker build -t sicei-app .'
+                echo 'Building..'
+               
+                dir('SICEI') {
+                   
+                    sh 'npm install'
+                    
+                    sh 'docker build -t sicei-app .'
+                }
             }
         }
 
+
         stage('Deploy') {
             steps {
-                echo 'Desplegando contenedor...'
-                sh 'docker run -d -p 3000:3000 sicei-app'
+                echo 'Deploying....'
+                dir('SICEI') {
+                   
+                    sh 'docker run -d -p 3000:3000 sicei-app'
+                }
             }
         }
     }
