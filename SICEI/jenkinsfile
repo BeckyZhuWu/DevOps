@@ -2,9 +2,18 @@ pipeline {
     agent any
 
     stages {
-        stage('Test sh') {
+        stage('Build') {
             steps {
-                sh 'echo "Hola desde Jenkins"'
+                echo 'Instalando dependencias y construyendo imagen Docker...'
+                sh 'npm install'
+                sh 'docker build -t sicei-app .'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Desplegando contenedor...'
+                sh 'docker run -d -p 3000:3000 sicei-app'
             }
         }
     }
