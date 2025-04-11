@@ -5,13 +5,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-               
-                dir('SICEI') {
-                   
-                    sh 'npm install'
-                    
-                    sh 'docker build -t sicei-app .'
-                }
+                sh 'npm install'
+                sh 'docker build -t sicei-app .'
             }
         }
 
