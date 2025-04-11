@@ -5,8 +5,11 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'ls -la'
-                sh 'docker build -t sicei-app .'
+
+                dir('SICEI') {
+                    sh 'ls -la'
+                    sh 'docker build -t sicei-app .'
+                }
             }
         }
 
