@@ -18,8 +18,11 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 dir('SICEI') {
-                   
-                    sh 'docker run -d -p 3000:3000 sicei-app'
+                    sh''' 
+                        docker stop sicei-container
+                        docker rm sicei-container
+                        docker run -d -p 3000:3000 sicei-app
+                    '''
                 }
             }
         }
